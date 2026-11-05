@@ -1,0 +1,237 @@
+<title>Black Hole Project</title>
+
+<style>
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+    }
+
+    /* ФОНОВОЕ ВИДЕО */
+
+    video {
+        position: fixed;
+        top: 0;
+        left: 0;
+
+        width: 100%;
+        height: 100%;
+
+        object-fit: cover;
+
+        z-index: 0;
+
+        pointer-events: none;
+        user-select: none;
+    }
+
+    /* КНОПКА ЗВУКА */
+
+    .sound-button {
+        position: fixed;
+
+        bottom: 30px;
+        right: 30px;
+
+        width: 55px;
+        height: 55px;
+
+        border: 1px solid rgba(255,255,255,0.4);
+        border-radius: 50%;
+
+        background: rgba(10,10,15,0.65);
+        color: white;
+
+        font-size: 23px;
+
+        cursor: pointer;
+
+        backdrop-filter: blur(10px);
+
+        transition: 0.3s;
+
+        z-index: 10;
+    }
+
+    .sound-button:hover {
+        background: rgba(255,255,255,0.2);
+        transform: scale(1.08);
+    }
+
+</style>
+<!-- ЧЁРНАЯ ДЫРА -->
+
+<video
+    id="blackhole"
+    autoplay
+    muted
+    loop
+    playsinline
+    disablepictureinpicture
+    preload="auto"
+    tabindex="-1"
+>
+
+    <source src="blackhole.mp4" type="video/mp4">
+
+</video>
+
+
+<!-- МУЗЫКАЛЬНЫЙ ПЛЕЕР -->
+
+<audio id="backgroundSound" preload="auto"></audio>
+
+
+<!-- КНОПКА ЗВУКА -->
+
+<button
+    class="sound-button"
+    id="soundButton"
+    onclick="toggleSound()"
+    aria-label="Включить звук"
+>
+    🔇
+</button>
+
+
+<script>
+
+    // ВИДЕО
+
+    const video = document.getElementById("blackhole");
+
+    video.muted = true;
+    video.loop = true;
+    video.controls = false;
+
+    video.play().catch(error => {
+        console.log("Ошибка запуска видео:", error);
+    });
+
+
+    // МУЗЫКАЛЬНЫЕ ДОРОЖКИ
+
+    const tracks = [
+        "sound1.mp3",
+        "sound2.mp3",
+        "sound3.mp3"
+    ];
+
+    const sound = document.getElementById("backgroundSound");
+    const button = document.getElementById("soundButton");
+
+    let soundEnabled = false;
+    let currentTrack = "";
+    let isStarting = false;
+
+
+    // СЛУЧАЙНЫЙ ВЫБОР МУЗЫКИ
+
+    function getRandomTrack() {
+
+        const availableTracks = tracks.filter(
+            track => track !== currentTrack
+        );
+
+        const randomIndex = Math.floor(
+            Math.random() * availableTracks.length
+        );
+
+        currentTrack = availableTracks[randomIndex];
+
+        return currentTrack;
+    }
+
+
+    // ЗАПУСК СЛЕДУЮЩЕЙ ДОРОЖКИ
+
+    async function playNextTrack() {
+
+        if (!soundEnabled || isStarting) return;
+
+        isStarting = true;
+
+        sound.pause();
+
+        sound.src = getRandomTrack();
+
+        sound.load();
+
+        try {
+
+            await sound.play();
+
+            console.log("Сейчас играет:", currentTrack);
+
+        } catch (error) {
+
+            console.log("Ошибка воспроизведения:", error);
+
+        } finally {
+
+            isStarting = false;
+
+        }
+
+    }
+
+
+    // КОГДА ДОРОЖКА ЗАКОНЧИЛАСЬ
+
+    sound.addEventListener("ended", () => {
+
+        if (soundEnabled) {
+            playNextTrack();
+        }
+
+    });
+
+
+    // ВКЛЮЧЕНИЕ И ВЫКЛЮЧЕНИЕ ЗВУКА
+
+    async function toggleSound() {
+
+        if (!soundEnabled) {
+
+            soundEnabled = true;
+
+            button.textContent = "🔊";
+            button.setAttribute("aria-label", "Выключить звук");
+
+            await playNextTrack();
+
+        } else {
+
+            soundEnabled = false;
+
+            sound.pause();
+
+            button.textContent = "🔇";
+            button.setAttribute("aria-label", "Включить звук");
+
+        }
+
+    }
+
+
+    // ЗАЩИТА ВИДЕО ОТ ОСТАНОВКИ
+
+    video.addEventListener("pause", () => {
+
+        if (!video.ended) {
+            video.play().catch(error => {
+                console.log("Ошибка видео:", error);
+            });
+        }
+
+    });
+
+</script>
