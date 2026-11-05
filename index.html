@@ -87,18 +87,17 @@
         gap: 35px;
 
         z-index: 1000;
-
-        transition: opacity 0.5s ease;
     }
 
-    .rotate-screen.visible {
+    /* ПОКАЗЫВАЕМ ЗАСТАВКУ ВЕРТИКАЛЬНО */
+
+@media screen and (max-width: 900px) and (orientation: portrait) {
+    .rotate-screen {
         display: flex;
     }
+}
 
-    .rotate-screen.hidden {
-        opacity: 0;
-        pointer-events: none;
-    }
+    
 
     /* ИКОНКА ТЕЛЕФОНА */
 
@@ -302,47 +301,6 @@
 
     // ЗАСТАВКА ПОВОРОТА
 
-    const rotateScreen =
-        document.getElementById("rotateScreen");
-
-    function checkOrientation() {
-
-        const isPhone =
-            window.matchMedia("(max-width: 900px)").matches;
-
-        const isPortrait =
-            window.matchMedia("(orientation: portrait)").matches;
-
-        if (isPhone && isPortrait) {
-
-            rotateScreen.classList.remove("hidden");
-            rotateScreen.classList.add("visible");
-
-        } else {
-
-            rotateScreen.classList.add("hidden");
-
-            setTimeout(() => {
-
-                if (
-                    !window.matchMedia(
-                        "(max-width: 900px) and (orientation: portrait)"
-                    ).matches
-                ) {
-                    rotateScreen.classList.remove("visible");
-                    rotateScreen.classList.remove("hidden");
-                }
-
-            }, 500);
-
-        }
-
-    }
-
-    checkOrientation();
-
-    window.addEventListener("resize", checkOrientation);
-    window.addEventListener("orientationchange", checkOrientation);
 
 
     // ВИДЕО
