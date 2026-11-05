@@ -13,6 +13,7 @@
         height: 100%;
         overflow: hidden;
         background: #000;
+        font-family: Arial, sans-serif;
     }
 
     /* ФОНОВОЕ ВИДЕО */
@@ -37,7 +38,6 @@
 
     .sound-button {
         position: fixed;
-
         bottom: 30px;
         right: 30px;
 
@@ -51,11 +51,9 @@
         color: white;
 
         font-size: 23px;
-
         cursor: pointer;
 
         backdrop-filter: blur(10px);
-
         transition: 0.3s;
 
         z-index: 10;
@@ -66,7 +64,165 @@
         transform: scale(1.08);
     }
 
+    /* ЗАСТАВКА ПОВОРОТА ТЕЛЕФОНА */
+
+    .rotate-screen {
+        position: fixed;
+        inset: 0;
+
+        background:
+            radial-gradient(
+                circle at center,
+                #17100b 0%,
+                #08090e 45%,
+                #000 100%
+            );
+
+        display: none;
+
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        gap: 35px;
+
+        z-index: 1000;
+
+        transition: opacity 0.5s ease;
+    }
+
+    .rotate-screen.visible {
+        display: flex;
+    }
+
+    .rotate-screen.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    /* ИКОНКА ТЕЛЕФОНА */
+
+    .phone-icon {
+        width: 75px;
+        height: 125px;
+
+        border: 3px solid #d9aa62;
+        border-radius: 13px;
+
+        position: relative;
+
+        box-shadow:
+            0 0 20px rgba(217,170,98,0.3);
+
+        animation: rotatePhone 2.5s ease-in-out infinite;
+    }
+
+    .phone-icon::before {
+        content: "";
+
+        position: absolute;
+
+        top: 7px;
+        left: 50%;
+
+        transform: translateX(-50%);
+
+        width: 22px;
+        height: 3px;
+
+        border-radius: 5px;
+
+        background: #d9aa62;
+    }
+
+    .phone-icon::after {
+        content: "";
+
+        position: absolute;
+
+        bottom: 7px;
+        left: 50%;
+
+        transform: translateX(-50%);
+
+        width: 6px;
+        height: 6px;
+
+        border-radius: 50%;
+
+        background: #d9aa62;
+    }
+
+    @keyframes rotatePhone {
+
+        0%, 20% {
+            transform: rotate(0deg);
+        }
+
+        60%, 80% {
+            transform: rotate(90deg);
+        }
+
+        100% {
+            transform: rotate(90deg);
+        }
+
+    }
+
+    /* НАДПИСЬ */
+
+    .rotate-title {
+        color: #e7c18c;
+
+        font-size: 17px;
+        letter-spacing: 3px;
+
+        text-align: center;
+
+        line-height: 1.7;
+
+        text-shadow:
+            0 0 15px rgba(217,170,98,0.4);
+    }
+
+    .rotate-subtitle {
+        color: rgba(255,255,255,0.55);
+
+        font-size: 12px;
+        letter-spacing: 2px;
+
+        text-align: center;
+    }
+
+    /* ТЕЛЕФОН ВЕРТИКАЛЬНО */
+
+    @media (max-width: 900px) and (orientation: portrait) {
+
+        .rotate-screen.visible {
+            display: flex;
+        }
+
+    }
+
 </style>
+<!-- ЗАСТАВКА -->
+
+<div class="rotate-screen" id="rotateScreen">
+
+    <div class="phone-icon"></div>
+
+    <div class="rotate-title">
+        ПОВЕРНИТЕ УСТРОЙСТВО<br>
+        ГОРИЗОНТАЛЬНО
+    </div>
+
+    <div class="rotate-subtitle">
+        BLACK HOLE PROJECT
+    </div>
+
+</div>
+
+
 <!-- ЧЁРНАЯ ДЫРА -->
 
 <video
@@ -85,7 +241,47 @@
 </video>
 
 
-<!-- МУЗЫКАЛЬНЫЙ ПЛЕЕР -->
+<!-- МУЗЫКА -->
+
+<audio id="backgroundSound" preload="auto"></audio>
+
+><!-- ЗАСТАВКА -->
+
+<div class="rotate-screen" id="rotateScreen">
+
+    <div class="phone-icon"></div>
+
+    <div class="rotate-title">
+        ПОВЕРНИТЕ УСТРОЙСТВО<br>
+        ГОРИЗОНТАЛЬНО
+    </div>
+
+    <div class="rotate-subtitle">
+        BLACK HOLE PROJECT
+    </div>
+
+</div>
+
+
+<!-- ЧЁРНАЯ ДЫРА -->
+
+<video
+    id="blackhole"
+    autoplay
+    muted
+    loop
+    playsinline
+    disablepictureinpicture
+    preload="auto"
+    tabindex="-1"
+>
+
+    <source src="blackhole.mp4" type="video/mp4">
+
+</video>
+
+
+<!-- МУЗЫКА -->
 
 <audio id="backgroundSound" preload="auto"></audio>
 
@@ -98,11 +294,56 @@
     onclick="toggleSound()"
     aria-label="Включить звук"
 >
-    🔇
+🔇
 </button>
 
 
 <script>
+
+    // ЗАСТАВКА ПОВОРОТА
+
+    const rotateScreen =
+        document.getElementById("rotateScreen");
+
+    function checkOrientation() {
+
+        const isPhone =
+            window.matchMedia("(max-width: 900px)").matches;
+
+        const isPortrait =
+            window.matchMedia("(orientation: portrait)").matches;
+
+        if (isPhone && isPortrait) {
+
+            rotateScreen.classList.remove("hidden");
+            rotateScreen.classList.add("visible");
+
+        } else {
+
+            rotateScreen.classList.add("hidden");
+
+            setTimeout(() => {
+
+                if (
+                    !window.matchMedia(
+                        "(max-width: 900px) and (orientation: portrait)"
+                    ).matches
+                ) {
+                    rotateScreen.classList.remove("visible");
+                    rotateScreen.classList.remove("hidden");
+                }
+
+            }, 500);
+
+        }
+
+    }
+
+    checkOrientation();
+
+    window.addEventListener("resize", checkOrientation);
+    window.addEventListener("orientationchange", checkOrientation);
+
 
     // ВИДЕО
 
@@ -125,15 +366,18 @@
         "sound3.mp3"
     ];
 
-    const sound = document.getElementById("backgroundSound");
-    const button = document.getElementById("soundButton");
+    const sound =
+        document.getElementById("backgroundSound");
+
+    const button =
+        document.getElementById("soundButton");
 
     let soundEnabled = false;
     let currentTrack = "";
     let isStarting = false;
 
 
-    // СЛУЧАЙНЫЙ ВЫБОР МУЗЫКИ
+    // СЛУЧАЙНЫЙ ВЫБОР
 
     function getRandomTrack() {
 
@@ -151,7 +395,7 @@
     }
 
 
-    // ЗАПУСК СЛЕДУЮЩЕЙ ДОРОЖКИ
+    // СЛЕДУЮЩАЯ ДОРОЖКА
 
     async function playNextTrack() {
 
@@ -173,7 +417,7 @@
 
         } catch (error) {
 
-            console.log("Ошибка воспроизведения:", error);
+            console.log("Ошибка музыки:", error);
 
         } finally {
 
@@ -184,7 +428,7 @@
     }
 
 
-    // КОГДА ДОРОЖКА ЗАКОНЧИЛАСЬ
+    // КОНЕЦ ДОРОЖКИ
 
     sound.addEventListener("ended", () => {
 
@@ -195,41 +439,44 @@
     });
 
 
-    // ВКЛЮЧЕНИЕ И ВЫКЛЮЧЕНИЕ ЗВУКА
+    // КНОПКА ЗВУКА
+async function toggleSound() {
+if (!soundEnabled) {
 
-    async function toggleSound() {
+    soundEnabled = true;
 
-        if (!soundEnabled) {
+    button.textContent = "🔊";
+    button.setAttribute(
+        "aria-label",
+        "Выключить звук"
+    );
 
-            soundEnabled = true;
+    await playNextTrack();
 
-            button.textContent = "🔊";
-            button.setAttribute("aria-label", "Выключить звук");
+} else {
 
-            await playNextTrack();
+    soundEnabled = false;
 
-        } else {
+    sound.pause();
 
-            soundEnabled = false;
+    button.textContent = "🔇";
+    button.setAttribute(
+        "aria-label",
+        "Включить звук"
+    );
+}
+}
 
-            sound.pause();
-
-            button.textContent = "🔇";
-            button.setAttribute("aria-label", "Включить звук");
-
-        }
-
-    }
-
-
-    // ЗАЩИТА ВИДЕО ОТ ОСТАНОВКИ
+    // ЗАЩИТА ВИДЕО
 
     video.addEventListener("pause", () => {
 
         if (!video.ended) {
+
             video.play().catch(error => {
                 console.log("Ошибка видео:", error);
             });
+
         }
 
     });
